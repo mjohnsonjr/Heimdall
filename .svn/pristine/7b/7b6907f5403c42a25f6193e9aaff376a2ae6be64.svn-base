@@ -1,0 +1,38 @@
+package com.heimdall.service.impl;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.heimdall.dao.Dao;
+import com.heimdall.dao.impl.DaoImpl;
+import com.heimdall.dao.model.User;
+import com.heimdall.service.UserService;
+
+/**
+ * Service layer of hibernate-mapped USER table.
+ * @author michael
+ *
+ */
+
+@Service  
+@Transactional 
+public class UserServiceImpl implements UserService{
+
+	
+	private Dao<User, Long> dao;
+	
+	@Autowired /* This method is to determine the class of the object passed to hibernate's .get() */
+	public void setDao(DaoImpl<User, Long> daoToSet) {
+		dao = daoToSet;
+		dao.setClazz(User.class);
+	}
+	
+	public User loadUser(String username) {
+		
+		Long pk = null;
+		//* NEED TO QUERY USERNAME FOR THE CORRESPONDING PK */
+		
+		return dao.get(pk);
+	}
+}

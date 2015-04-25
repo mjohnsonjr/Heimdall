@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+    xmlns:beans="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:jdbc="http://www.springframework.org/schema/jdbc" 
+    xmlns:context="http://www.springframework.org/schema/context"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+           http://www.springframework.org/schema/jdbc
+           http://www.springframework.org/schema/jdbc/spring-jdbc-3.2.xsd
+           http://www.springframework.org/schema/security
+           http://www.springframework.org/schema/security/spring-security-3.1.xsd
+           http://www.springframework.org/schema/context 
+           http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+
+	<context:component-scan base-package="com.heimdall"/>
+	
+	<!--  Fixes the @Secured Annotations in controller : http://stackoverflow.com/questions/2375753/spring-security-3-spring-mvc-and-the-dreaded-secured-requestmapping -->
+	<global-method-security proxy-target-class = "true" secured-annotations="enabled"/>
+	
+
+    <http auto-config="true">
+		 <form-login 
+		     authentication-success-handler-ref="authenticationSuccessHandler"
+		 	 authentication-failure-handler-ref="authenticationFailureHandler" 
+		 	 login-page="/"/>
+        
+        <intercept-url pattern="/**"/>
+        <logout logout-url="/logout"
+            	logout-success-url="/" />
+    </http>
+
+    <authentication-manager>
+        <authentication-provider user-service-ref ="userDetailsService">
+			<password-encoder ref="passwordEncoder"/>
+         </authentication-provider>
+     </authentication-manager>
+</beans:beans>

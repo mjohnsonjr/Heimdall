@@ -1,0 +1,26 @@
+package com.heimdall.controller;
+
+import java.security.Principal;
+
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.ModelMap;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+
+@Controller
+@RequestMapping("/Manager/**")
+public class ManagerController extends BaseLoginController{
+	
+	@Secured("ROLE_MANAGER")
+	@RequestMapping(value="/Manager/index", method = RequestMethod.GET)
+	public String printIndexManager(ModelMap model, Principal principal) {
+ 
+		String name = principal.getName(); /* User name */
+		model.addAttribute("username", name);
+		model.addAttribute("message", "Form example");
+		
+		log.debug("Authenticated MANAGER \"" + name + "\" successfully.");
+		return "/Manager/index";
+	}
+}

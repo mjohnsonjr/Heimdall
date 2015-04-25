@@ -1,0 +1,57 @@
+package com.heimdall.dao.impl;
+
+import java.io.Serializable;
+
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import com.heimdall.dao.Dao;
+
+/**
+ * 
+ * @author michael
+ *
+ * @param <M> The Hibernate model Class (User, etc.).
+ * @param <PK> The Primary Key type of this table.
+ */
+
+@Repository
+public class DaoImpl<M, PK extends Serializable> implements Dao<M, PK>{
+	
+	@Autowired
+	private SessionFactory sessionFactory;
+	
+	private Class<M> clazz;
+	
+	/* Use dependency injection to set this, needed to determine the instance type */
+	public void setClazz(Class<M> clazzToSet){
+	      this.clazz = clazzToSet;
+	   }
+	
+	
+	private Session getCurrentSession(){
+		return sessionFactory.getCurrentSession();
+	}
+
+	public void delete(Object obj) {
+		getCurrentSession().delete(obj);
+		
+	}
+
+	public void save(Object obj) {
+		getCurrentSession().save(obj);
+		
+	}
+
+	public void saveOrUpdate(Object obj) {
+		getCurrentSession().saveOrUpdate(obj);
+		
+	}
+
+	@SuppressWarnings("unchecked")
+	public M get(Serializable id) {
+		return (M) getCurrentSession().get(clazz, id);
+	}
+}

@@ -1,0 +1,16 @@
+package com.heimdall.dao;
+
+import java.io.Serializable;
+
+/**
+ * Generic Dao interface that can be used (@Autowired) in a Service class
+ *
+ */
+public interface Dao<T, PK extends Serializable> {
+
+	public T get(PK id);
+	public void delete(T obj);
+	public void save(T obj);
+	public void saveOrUpdate(T obj);
+	public void setClazz(Class< T > clazzToSet);
+}

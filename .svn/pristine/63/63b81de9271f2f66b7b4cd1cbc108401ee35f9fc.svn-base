@@ -1,0 +1,146 @@
+package com.heimdall;
+
+import java.util.Properties;
+
+import javax.sql.DataSource;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.ImportResource;
+import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.orm.hibernate4.HibernateTransactionManager;
+import org.springframework.orm.hibernate4.LocalSessionFactoryBean;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
+import org.springframework.web.servlet.ViewResolver;
+import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
+import org.springframework.web.servlet.view.InternalResourceViewResolver;
+
+import com.heimdall.security.AuthFailureHandler;
+import com.heimdall.security.AuthSuccessHandler;
+import com.heimdall.security.UserDetailsServiceImpl;
+
+@Configuration
+@EnableWebMvc
+@EnableTransactionManagement
+@ComponentScan("com.heimdall") /* Scans package for controllers */
+@ImportResource(value = { "classpath:security.xml" }) /* Spring security XML config */
+public class CoreConfiguration extends  WebMvcConfigurerAdapter{
+	
+	@Bean
+	public ViewResolver viewResolver(){
+		InternalResourceViewResolver view = new InternalResourceViewResolver();
+		view.setPrefix("/WEB-INF/views/");
+		view.setSuffix(".jsp");
+		return view;
+	}
+	
+	@Override
+	public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer) {
+	        configurer.enable();
+	}
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        //registry.addResourceHandler("/assets/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+        //registry.addResourceHandler("/css/**").addResourceLocations("/resources/css/");
+        //registry.addResourceHandler("/img/**").addResourceLocations("/resources/img/");
+        //registry.addResourceHandler("/js/**").addResourceLocations("/resources/js/");
+        //registry.addResourceHandler("/views/**").addResourceLocations("/WEB-INF/views");
+        //registry.addResourceHandler("/").addResourceLocations("/resources/");
+        registry.addResourceHandler("/resources/**").addResourceLocations("/resources/**");
+    }
+    
+    /**
+     *  Hibernate Properties Config
+     *  
+     */
+    @Bean
+    public Properties hibernateProperties() {
+        Properties properties = new Properties();
+        properties.put("hibernate.dialect", "org.hibernate.dialect.MySQL5Dialect");
+        properties.put("hibernate.show_sql", "true");       
+//        properties.put("hibernate.hbm2ddl.auto", "create");
+//        properties.put("hibernate.connection.driver_class", "com.mysql.jdbc.Driver");
+//        properties.put("hibernate.connection.url", "jdbc:mysql://shortstop.student.iastate.edu:3306/deploy");
+//        properties.put("hibernate.connection.username", "test");
+//        properties.put("hibernate.connection.password", "test");
+//        properties.put("hibernate.connection.pool_size", "10");        
+//        properties.put("hibernate.format_sql", "true");
+//        properties.put("hibernate.use_sql_comments", "true");
+//        properties.put("hibernate.c3p0.min_size", "5");
+//        properties.put("hibernate.c3p0.max_size", "20");
+//        properties.put("hibernate.c3p0.timeout", "300");
+//        properties.put("hibernate.c3p0.max_statements", "50");
+//        properties.put("hibernate.c3p0.idle_test_period", "3000");
+//        properties.put("hibernate.cache.use_second_level_cache", "true");
+//        properties.put("hibernate.cache.region.factory_class",
+//        "org.hibernate.cache.ehcache.SingletonEhCacheRegionFactory");
+//        properties.put("hibernate.cache.use_query_cache", "true");
+//        properties.put("hibernate.cache.use_minimal_puts", "true");
+//        properties.put("hibernate.max_fetch_depth", "10");        
+
+        return properties;
+    }
+
+    /**
+     * Database configuration, JDBC connector.
+     * 
+     */
+    @Bean
+    public DataSource dataSource() {
+        final DriverManagerDataSource dataSource = new DriverManagerDataSource();
+            dataSource.setDriverClassName("com.mysql.jdbc.Driver");
+            dataSource.setUrl("jdbc:mysql://shortstop.student.iastate.edu:3306/deploy");
+            dataSource.setUsername("test");
+            dataSource.setPassword("test");
+            //dataSource.setConnectionProperties(hibernateProperties());
+            return dataSource;
+    }
+    
+    /** 
+     * Builds Hibernate database sessionFactory using Spring annotations.
+     * 
+     */
+    
+    @Bean
+    public LocalSessionFactoryBean sessionFactory(){
+    	LocalSessionFactoryBean sessionFactory = new LocalSessionFactoryBean();
+    	sessionFactory.setDataSource(dataSource());
+    	sessionFactory.setPackagesToScan("com.heimdall.dao.model");
+    	sessionFactory.setHibernateProperties(hibernateProperties());
+		return sessionFactory;
+    }
+    
+    @Bean
+    public HibernateTransactionManager hibernateTransactionManager(){
+    	
+    	HibernateTransactionManager transactionManager = new HibernateTransactionManager();
+		transactionManager.setSessionFactory(sessionFactory().getObject());
+		return transactionManager;
+    }
+    
+    /**
+     *  Security user authentication and redirection based on role.
+     **/
+    @Bean
+    public UserDetailsService userDetailsService(){
+    	return new UserDetailsServiceImpl();
+    }
+    
+    @Bean
+    public AuthenticationSuccessHandler authenticationSuccessHandler(){
+    	return new AuthSuccessHandler();
+    }
+    
+    @Bean
+    public AuthenticationFailureHandler authenticationFailureHandler(){
+    	return new AuthFailureHandler();
+    }
+}
